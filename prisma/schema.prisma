@@ -1,0 +1,129 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  uuid       String   @unique @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  role_id    Int
+  role       Role     @relation(fields: [role_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  //Relations
+  products Product[]
+
+  //Indexes
+  @@index([name])
+  @@index([email])
+  @@index([role_id])
+  @@map("users")
+}
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  //Relations
+  users       User[]
+  permissions RolePermission[]
+
+  //Indexes
+  @@index([name])
+  @@map("roles")
+}
+
+model Permission {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  //Relations
+  roles RolePermission[]
+
+  //Indexes
+  @@index([name])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id            Int @id @default(autoincrement())
+  role_id       Int
+  permission_id Int
+
+  //Relations
+  role       Role       @relation(fields: [role_id], references: [id])
+  permission Permission @relation(fields: [permission_id], references: [id])
+
+  //Unique
+  @@unique([role_id, permission_id])
+  //Indexes
+  @@index([role_id])
+  @@index([permission_id])
+  
+  @@map("role_permissions")
+}
+
+model Product {
+  id                  Int      @id @default(autoincrement())
+  uuid                String   @unique @default(uuid())
+  name                String   @unique
+  description         String
+  price               Decimal  @db.Decimal(8, 2)
+  quantity            Int
+  low_stock_threshold Int
+  supplier            String?
+  category_id         Int
+  added_by            Int
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  //Relations
+  category Category @relation(fields: [category_id], references: [id])
+  user     User     @relation(fields: [added_by], references: [id])
+
+  //Indexes
+  @@index([uuid])
+  @@index([name])
+  @@index([price])
+  @@index([quantity])
+  @@index([category_id])
+  @@index([added_by])
+  @@index([low_stock_threshold])
+  @@map("products")
+}
+
+model Category {
+  id         Int      @id @default(autoincrement())
+  uuid       String   @unique @default(uuid())
+  name       String
+  parent_id  Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  //Relations
+  products      Product[]
+  parent        Category?  @relation("Parent", fields: [parent_id], references: [id])
+  subcategories Category[] @relation("Parent")
+
+  //Indexes
+  @@index([uuid])
+  @@index([name])
+  @@index([parent_id])
+  @@map("categories")
+}
