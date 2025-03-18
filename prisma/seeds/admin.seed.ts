@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcryptjs from 'bcryptjs'
-import { logError, logInfo } from '../../src/utils/logger/logger';
+import { logdWarning, logError, logInfo } from '../../src/utils/logger/logger';
 import { ROLES } from '../../src/constants/role-permissions';
 
 
@@ -43,7 +43,7 @@ const seedAdmin = async () => {
         });
 
         if (userExist) {
-            console.warn("Admin already exist");
+            logdWarning("Admin already exist");
             return;
         }
 

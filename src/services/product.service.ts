@@ -2,19 +2,11 @@ import { Prisma } from '@prisma/client';
 import { pagination } from '../helpers/response.helpers';
 import { prisma } from '../utils/database/config.database';
 import { sendLowStockAlert } from '../helpers/alert.helpers';
+import { ProductData, ProductResponse } from '../types/product.types';
+import { transformProductData } from '../transformers/product.transformers';
 
-interface ProductData {
-  name: string;
-  description: string;
-  price: number;
-  quantity: number;
-  low_stock_threshold: number;
-  supplier?: string;
-  category_id: number;
-  added_by: number;
-}
 
-export const createProduct = async (data: ProductData) => {
+export const createProduct = async (data: ProductData): Promise<ProductResponse> => {
   const existingProduct = await prisma.product.findUnique({
     where: { name: data.name }
   });
@@ -31,26 +23,10 @@ export const createProduct = async (data: ProductData) => {
     }
   });
 
-  return {
-    id: product.id,
-    uuid: product.uuid,
-    name: product.name,
-    description: product.description,
-    price: product.price.toNumber(),
-    quantity: product.quantity,
-    lowStockThreshold: product.low_stock_threshold,
-    supplier: product.supplier,
-    category: {
-      id: product.category.id,
-      name: product.category.name,
-    },
-    addedBy: product.user.name,
-    createdAt: product.created_at,
-    updatedAt: product.updated_at
-  };
+  return transformProductData(product);
 };
 
-export const getAllProducts = async (filters: any, page: number, limit: number) => {
+export const getAllProducts = async (filters: any, page: number, limit: number): Promise<any> => {
   const offset = (page - 1) * limit;
 
 
@@ -78,28 +54,12 @@ export const getAllProducts = async (filters: any, page: number, limit: number) 
   ]);
 
 
-  const formattedProducts = products.map(product => ({
-    id: product.id,
-    uuid: product.uuid,
-    name: product.name,
-    description: product.description,
-    price: product.price.toNumber(),
-    quantity: product.quantity,
-    lowStockThreshold: product.low_stock_threshold,
-    supplier: product.supplier,
-    category: {
-      id: product.category.id,
-      name: product.category.name
-    },
-    addedBy: product.user.name,
-    createdAt: product.created_at,
-    updatedAt: product.updated_at
-  }));
+  const formattedProducts = products.map(transformProductData);  
 
   return pagination(formattedProducts, totalRecords, page, limit);
 };
 
-export const getProductById = async (id: number) => {
+export const getProductById = async (id: number): Promise<ProductResponse | null> => {
   const product = await prisma.product.findUnique({
     where: {
       id: id
@@ -114,27 +74,11 @@ export const getProductById = async (id: number) => {
     throw { statusCode: 404, message: 'Product not found.' };
   }
 
-  return {
-    id: product.id,
-    uuid: product.uuid,
-    name: product.name,
-    description: product.description,
-    price: product.price.toNumber(),
-    quantity: product.quantity,
-    lowStockThreshold: product.low_stock_threshold,
-    supplier: product.supplier,
-    category: {
-      id: product.category.id,
-      name: product.category.name,
-    },
-    addedBy: product.user.name,
-    createdAt: product.created_at,
-    updatedAt: product.updated_at
-  };
+  return transformProductData(product);
 
 };
 
-export const updateProduct = async (id: number, data: Partial<ProductData>) => {
+export const updateProduct = async (id: number, data: Partial<ProductData>): Promise<ProductResponse>  => {
   const existingProduct = await prisma.product.findUnique({ where: { id } });
   if (!existingProduct) {
     throw { statusCode: 404, message: 'Product not found.' };
@@ -150,30 +94,14 @@ export const updateProduct = async (id: number, data: Partial<ProductData>) => {
     }
   });
 
-  return {
-    id: updatedProduct.id,
-    uuid: updatedProduct.uuid,
-    name: updatedProduct.name,
-    description: updatedProduct.description,
-    price: updatedProduct.price.toNumber(),
-    quantity: updatedProduct.quantity,
-    lowStockThreshold: updatedProduct.low_stock_threshold,
-    supplier: updatedProduct.supplier,
-    category: {
-      id: updatedProduct.category.id,
-      name: updatedProduct.category.name
-    },
-    addedBy: updatedProduct.user.name,
-    createdAt: updatedProduct.created_at,
-    updatedAt: updatedProduct.updated_at
-  };
+  return transformProductData(updatedProduct);
 };
 
 export const deleteProduct = async (id: number) => {
   return prisma.product.delete({ where: { id } });
 };
 
-export const updateStock = async (productId: number, quantityChange: number, userId: number) => {
+export const updateStock = async (productId: number, quantityChange: number, userId: number): Promise<ProductResponse> => {
   const product = await prisma.product.findUnique({
     where: { id: productId },
     include: {
@@ -201,36 +129,22 @@ export const updateStock = async (productId: number, quantityChange: number, use
     }
   });
 
-  // Check for low stock threshold
+
   if (updatedProduct.quantity <= updatedProduct.low_stock_threshold) {
     await sendLowStockAlert(updatedProduct, userId);
   }
 
-  return {
-    id: updatedProduct.id,
-    uuid: updatedProduct.uuid,
-    name: updatedProduct.name,
-    description: updatedProduct.description,
-    price: updatedProduct.price.toNumber(),
-    quantity: updatedProduct.quantity,
-    lowStockThreshold: updatedProduct.low_stock_threshold,
-    supplier: updatedProduct.supplier,
-    category: {
-      id: updatedProduct.category.id,
-      name: updatedProduct.category.name
-    },
-    addedBy: updatedProduct.user.name,
-    createdAt: updatedProduct.created_at,
-    updatedAt: updatedProduct.updated_at
-  };
+  return transformProductData(updatedProduct);
 };
 
-export const lowStockAlert = async () => {
-  return prisma.product.findMany({
+export const lowStockAlert = async (): Promise<ProductResponse[]> => {
+  const products = await prisma.product.findMany({
     where: {
       quantity: {
         lte: prisma.product.fields.low_stock_threshold
       }
     }
   });
+  return products.map(transformProductData);
+
 };

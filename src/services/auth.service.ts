@@ -2,15 +2,10 @@ import { prisma } from '../utils/database/config.database';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET, JWT_EXPIRATION } from '../constants/jwt';
+import { UserData, UserResponse } from '../types/auth.types';
+import { transformUserData } from '../transformers/user.transformers';
 
-interface UserData {
-  name: string;
-  email: string;
-  password: string;
-  role: string;
-}
-
-export const registerUser = async (data: UserData) => {
+export const registerUser = async (data: UserData):  Promise<UserResponse> => {
   const { name, email, password, role } = data;
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -34,18 +29,10 @@ export const registerUser = async (data: UserData) => {
     }
   });
 
-  const userData = {
-    id: user.id,
-    uuid: user.uuid,
-    name: user.name,
-    email: user.email,
-    role: user.role.name
-  };
-
-  return userData;
+  return transformUserData(user);
 };
 
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (email: string, password: string):  Promise<{ token: string, userData: UserResponse }> => {
   const user = await prisma.user.findUnique({
     where: { email },
     include: { role: true }
@@ -60,13 +47,7 @@ export const loginUser = async (email: string, password: string) => {
     expiresIn: JWT_EXPIRATION
   });
 
-  const userData = {
-    id: user.id,
-    uuid: user.uuid,
-    name: user.name,
-    email: user.email,
-    role: user.role.name
-  };
+  const userData = transformUserData(user);
 
   return { token, userData };
 };

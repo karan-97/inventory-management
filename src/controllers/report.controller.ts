@@ -3,6 +3,7 @@ import * as ReportsService from '../services/report.service';
 import { exportToCSV, exportToPDF } from '../helpers/export.helpers';
 import { successResponse, errorResponse } from '../helpers/response.helpers';
 import { StatusCodes } from 'http-status-codes';
+import camelize from 'camelize';
 
 export const generateReport = async (req: Request, res: Response) => {
   try {
@@ -28,7 +29,6 @@ export const generateReport = async (req: Request, res: Response) => {
         fileName = 'out_of_stock';
         break;
       case 'low_stock':
-        console.log("inside low stocks executin.......")
         data = await ReportsService.getLowStockItems(filters);
         fields = ['id', 'name', 'category_id', 'quantity'];
         fileName = 'low_stock';
@@ -52,7 +52,7 @@ export const generateReport = async (req: Request, res: Response) => {
       return res.download(filePath);
     }
 
-    return successResponse(res, StatusCodes.OK, 'Report generated successfully.', data);
+    return successResponse(res, StatusCodes.OK, 'Report generated successfully.', camelize(data));
   } catch (error: any) {
     return errorResponse(res, StatusCodes.INTERNAL_SERVER_ERROR, error.message);
   }

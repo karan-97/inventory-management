@@ -1,8 +1,6 @@
+import { formatProductData } from '../transformers/report.trasnformers';
+import { ReportFilters } from '../types/report.types';
 import { prisma } from '../utils/database/config.database';
-
-interface ReportFilters {
-  category_id?: number;
-}
 
 export const getTotalStockValue = async (filters: ReportFilters) => {
   const result = await prisma.product.groupBy({
@@ -29,24 +27,7 @@ export const getOutOfStockItems = async (filters: ReportFilters) => {
     }
   });
 
-  const formattedProducts = products?.map(product => ({
-    id: product.id,
-    uuid: product.uuid,
-    name: product.name,
-    description: product.description,
-    price: product.price.toNumber(),
-    quantity: product.quantity,
-    lowStockThreshold: product.low_stock_threshold,
-    supplier: product.supplier,
-    category: {
-      id: product.category.id,
-      name: product.category.name
-    },
-    addedBy: product.user.name,
-    createdAt: product.created_at,
-    updatedAt: product.updated_at
-  }));
-  return formattedProducts
+  return products.map(formatProductData);
 };
 
 export const getLowStockItems = async (filters: ReportFilters) => {
@@ -59,24 +40,7 @@ export const getLowStockItems = async (filters: ReportFilters) => {
     include: { category: true, user: true }
   });
 
-  const formattedProducts = products?.map(product => ({
-    id: product.id,
-    uuid: product.uuid,
-    name: product.name,
-    description: product.description,
-    price: product.price.toNumber(),
-    quantity: product.quantity,
-    lowStockThreshold: product.low_stock_threshold,
-    supplier: product.supplier,
-    category: {
-      id: product.category.id,
-      name: product.category.name
-    },
-    addedBy: product.user.name,
-    createdAt: product.created_at,
-    updatedAt: product.updated_at
-  }));
-  return formattedProducts
+  return products.map(formatProductData);
 };
 
 export const getCategoryWiseDistribution = async (filters: ReportFilters) => {

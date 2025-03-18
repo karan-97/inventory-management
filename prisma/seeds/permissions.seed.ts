@@ -1,11 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import { PERMISSIONS } from '../../src/constants/role-permissions';
+import { logError, logInfo } from '../../src/utils/logger/logger';
 
 const prisma = new PrismaClient();
 
 export const seedPermissions = async () => {
   try {
-    console.log('🌱 Seeding Permissions...');
+    logInfo('🌱 Seeding Permissions...')
     const allPermissions = [
       ...PERMISSIONS.PRODUCT,
       ...PERMISSIONS.CATEGORY,
@@ -19,10 +20,9 @@ export const seedPermissions = async () => {
         create: { name: permission }
       });
     }
-
-    console.log('✅ Permissions seeded successfully!');
+    logInfo('✅ Permissions seeded successfully!')
   } catch (error) {
-    console.error('❌ Error seeding Permissions:', error);
+    logError('❌ Error seeding Permissions:', error)
   } finally {
     await prisma.$disconnect();
   }

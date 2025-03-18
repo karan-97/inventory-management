@@ -1,10 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { ROLES } from '../../src/constants/role-permissions';
+import { logError, logInfo } from '../../src/utils/logger/logger';
 const prisma = new PrismaClient();
 
 export const seedRoles = async () => {
   try {
-    console.log('🌱 Seeding Roles...');
+    logInfo('🌱 Seeding Roles...');
     const roles = Object.values(ROLES); // ['admin', 'user']
 
     for (const roleName of roles) {
@@ -15,9 +16,9 @@ export const seedRoles = async () => {
       });
     }
 
-    console.log('✅ Roles seeded successfully!');
+    logInfo('✅ Roles seeded successfully!');
   } catch (error) {
-    console.error('❌ Error seeding Roles:', error);
+    logError('❌ Error seeding Roles:', error);
   } finally {
     await prisma.$disconnect();
   }
