@@ -27,6 +27,9 @@ An advanced **Inventory Management System** built using **Node.js**, **Express**
 
 ---
 
+### 📄 API Documentation (Postman)
+For detailed API documentation, check out our [API Docs](https://documenter.getpostman.com/view/43178232/2sAYkDPM5n).
+
 ## 📂 Project Structure
 ```bash
 src/
