@@ -75,7 +75,6 @@ model RolePermission {
   //Indexes
   @@index([role_id])
   @@index([permission_id])
-  
   @@map("role_permissions")
 }
 
@@ -93,8 +92,7 @@ model Product {
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt
 
-  //Relations
-  category Category @relation(fields: [category_id], references: [id])
+  category Category @relation("CategoryToProduct", fields: [category_id], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [added_by], references: [id])
 
   //Indexes
@@ -117,9 +115,9 @@ model Category {
   updated_at DateTime @updatedAt
 
   //Relations
-  products      Product[]
-  parent        Category?  @relation("Parent", fields: [parent_id], references: [id])
-  subcategories Category[] @relation("Parent")
+  parent        Category?  @relation("Subcategories", fields: [parent_id], references: [id], onDelete: Cascade)
+  subcategories Category[] @relation("Subcategories")
+  products      Product[]  @relation("CategoryToProduct")
 
   //Indexes
   @@index([uuid])

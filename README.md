@@ -9,6 +9,7 @@ An advanced **Inventory Management System** built using **Node.js**, **Express**
 - **Role-Based Access Control** (Admin & User)
 - **Category Management** with Subcategories
 - **Product Management** (Admin)
+- **Report Management** (Admin) (Admin can use a single API to view reports and export them to CSV or PDF by passing the appropriate parameters.)
 - API validation using **Joi** and **express-validation**
 - Consistent, standardized API responses with **camelCase**
 - Scalable architecture with **Controller-Service** pattern
@@ -23,12 +24,14 @@ An advanced **Inventory Management System** built using **Node.js**, **Express**
 - **JWT** for authentication
 - **bcryptjs** for secure password hashing
 - **Joi** for request validation
-- **Nodemailer** for email notifications
+- **Nodemailer** for email notifications (An email will be sent to both the admin and the user whenever the low_stock_threshold is reached or if the stock value falls below the threshold)
 
 ---
 
 ### 📄 API Documentation (Postman)
 For detailed API documentation, check out our [API Docs](https://documenter.getpostman.com/view/43178232/2sAYkDPM5n).
+
+Note: I have successfully integrated Swagger, and it is working as expected. However, due to time constraints, I wasn't able to update the documentation on Swagger. That said, the Postman collection is fully up to date.
 
 ## 📂 Project Structure
 ```bash
@@ -110,6 +113,12 @@ API_BASE_URL=`http://localhost:${PORT}`
 ADMIN_NAME="Karan Ganwani"
 ADMIN_EMAIL=admin@inventory.com
 ADMIN_PASSWORD=Admin@123
+
+#EMAIL DETAILS
+EMAIL_HOST=localhost // smtp
+EMAIL_PORT=1025
+EMAIL_USER=
+EMAIL_PASS=
 ```
 
 ### Step 4: Set Up the Database

@@ -56,7 +56,7 @@ export const loginUser = async (email: string, password: string) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error('Invalid email or password.');
 
-  const token = jwt.sign({ userId: user.id, role: user.role_id }, JWT_SECRET, {
+  const token = jwt.sign({ userId: user.id, role: user.role.name }, JWT_SECRET, {
     expiresIn: JWT_EXPIRATION
   });
 
